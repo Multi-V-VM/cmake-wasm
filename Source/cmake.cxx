@@ -1502,14 +1502,8 @@ void cmake::SetArgs(std::vector<std::string> const& args)
       return;
     }
     if (profilingFormat == "google-trace"_s) {
-      try {
         this->ProfilingOutput =
           cm::make_unique<cmMakefileProfilingData>(profilingOutput);
-      } catch (std::runtime_error& e) {
-        cmSystemTools::Error(
-          cmStrCat("Could not start profiling: ", e.what()));
-        return;
-      }
     } else {
       cmSystemTools::Error("Invalid format specified for --profiling-format");
       return;

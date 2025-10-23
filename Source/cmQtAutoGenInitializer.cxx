@@ -295,11 +295,7 @@ bool InfoWriter::Save(std::string const& filename)
   }
 
   Json::StyledStreamWriter jsonWriter;
-  try {
     jsonWriter.write(fileStream, this->Value_);
-  } catch (...) {
-    return false;
-  }
 
   return fileStream.Close();
 }

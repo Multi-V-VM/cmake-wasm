@@ -30,8 +30,6 @@ cm::string_view cmList::element_separator{ ";" };
 cmList cmList::sublist(size_type pos, size_type length) const
 {
   if (pos >= this->Values.size()) {
-    throw std::out_of_range(cmStrCat(
-      "begin index: ", pos, " is out of range 0 - ", this->Values.size() - 1));
   }
 
   size_type count = (length == npos || pos + length > this->size())
@@ -83,9 +81,6 @@ cmList& cmList::filter(cm::string_view pattern, FilterMode mode)
 {
   cmsys::RegularExpression regex(std::string{ pattern });
   if (!regex.is_valid()) {
-    throw std::invalid_argument(
-      cmStrCat("sub-command FILTER, mode REGEX failed to compile regex \"",
-               pattern, "\"."));
   }
 
   auto it = std::remove_if(this->Values.begin(), this->Values.end(),
@@ -307,9 +302,6 @@ protected:
       index = static_cast<index_type>(count) + index;
     }
     if (index < 0 || count <= static_cast<std::size_t>(index)) {
-      throw transform_error(cmStrCat(
-        "sub-command TRANSFORM, selector ", this->Tag, ", index: ", index,
-        " out of range (-", count, ", ", count - 1, ")."));
     }
     return index;
   }
@@ -356,10 +348,6 @@ public:
 
     // Does stepping move us further from the end?
     if (this->Start > this->Stop) {
-      throw transform_error(
-        cmStrCat("sub-command TRANSFORM, selector FOR "
-                 "expects <start> to be no greater than <stop> (",
-                 this->Start, " > ", this->Stop, ')'));
     }
 
     // compute indexes
@@ -527,14 +515,8 @@ public:
       regex, replace, selector->Makefile);
 
     if (!this->ReplaceHelper->IsRegularExpressionValid()) {
-      throw transform_error(
-        cmStrCat("sub-command TRANSFORM, action REPLACE: Failed to compile "
-                 "regex \"",
-                 regex, "\"."));
     }
     if (!this->ReplaceHelper->IsReplaceExpressionValid()) {
-      throw transform_error(cmStrCat("sub-command TRANSFORM, action REPLACE: ",
-                                     this->ReplaceHelper->GetError(), '.'));
     }
   }
   void Initialize(TransformSelector* selector,
@@ -550,9 +532,6 @@ public:
       std::string output;
 
       if (!this->ReplaceHelper->Replace(s, output)) {
-        throw transform_error(
-          cmStrCat("sub-command TRANSFORM, action REPLACE: ",
-                   this->ReplaceHelper->GetError(), '.'));
       }
 
       return output;
@@ -625,15 +604,9 @@ ActionDescriptorSet::iterator TransformConfigure(
 
   auto descriptor = Descriptors.find(action);
   if (descriptor == Descriptors.end()) {
-    throw transform_error(cmStrCat(" sub-command TRANSFORM, ",
-                                   static_cast<int>(action),
-                                   " invalid action."));
   }
 
   if (descriptor->Arity != arity) {
-    throw transform_error(cmStrCat("sub-command TRANSFORM, action ",
-                                   descriptor->Name, " expects ",
-                                   descriptor->Arity, " argument(s)."));
   }
   if (!selector) {
     selector = cm::make_unique<TransformNoSelector>();
@@ -670,12 +643,8 @@ std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewFOR(
   std::initializer_list<index_type> indexes)
 {
   if (indexes.size() < 2 || indexes.size() > 3) {
-    throw transform_error("sub-command TRANSFORM, selector FOR "
-                          "expects 2 or 3 arguments");
   }
   if (indexes.size() == 3 && *(indexes.begin() + 2) < 0) {
-    throw transform_error("sub-command TRANSFORM, selector FOR expects "
-                          "positive numeric value for <step>.");
   }
 
   return cm::make_unique<TransformSelectorFor>(
@@ -686,12 +655,8 @@ std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewFOR(
   std::vector<index_type> const& indexes)
 {
   if (indexes.size() < 2 || indexes.size() > 3) {
-    throw transform_error("sub-command TRANSFORM, selector FOR "
-                          "expects 2 or 3 arguments");
   }
   if (indexes.size() == 3 && indexes[2] < 0) {
-    throw transform_error("sub-command TRANSFORM, selector FOR expects "
-                          "positive numeric value for <step>.");
   }
 
   return cm::make_unique<TransformSelectorFor>(
@@ -701,12 +666,8 @@ std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewFOR(
   std::vector<index_type>&& indexes)
 {
   if (indexes.size() < 2 || indexes.size() > 3) {
-    throw transform_error("sub-command TRANSFORM, selector FOR "
-                          "expects 2 or 3 arguments");
   }
   if (indexes.size() == 3 && indexes[2] < 0) {
-    throw transform_error("sub-command TRANSFORM, selector FOR expects "
-                          "positive numeric value for <step>.");
   }
 
   return cm::make_unique<TransformSelectorFor>(
@@ -719,10 +680,6 @@ std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewREGEX(
   std::unique_ptr<::TransformSelector> selector =
     cm::make_unique<TransformSelectorRegex>(regex);
   if (!selector->Validate()) {
-    throw transform_error(
-      cmStrCat("sub-command TRANSFORM, selector REGEX failed to compile "
-               "regex \"",
-               regex, "\"."));
   }
   // weird construct to please all compilers
   return std::unique_ptr<cmList::TransformSelector>(selector.release());
@@ -733,10 +690,7 @@ std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewREGEX(
   std::unique_ptr<::TransformSelector> selector =
     cm::make_unique<TransformSelectorRegex>(std::move(regex));
   if (!selector->Validate()) {
-    throw transform_error(
-      cmStrCat("sub-command TRANSFORM, selector REGEX failed to compile "
-               "regex \"",
-               regex, "\"."));
+    
   }
   // weird construct to please all compilers
   return std::unique_ptr<cmList::TransformSelector>(selector.release());
@@ -842,8 +796,7 @@ cmList::size_type cmList::ComputeIndex(index_type pos, bool boundCheck) const
 {
   if (boundCheck) {
     if (this->Values.empty()) {
-      throw std::out_of_range(
-        cmStrCat("index: ", pos, " out of range (0, 0)"));
+      
     }
 
     auto index = pos;
@@ -853,9 +806,7 @@ cmList::size_type cmList::ComputeIndex(index_type pos, bool boundCheck) const
         index = static_cast<index_type>(length) + index;
       }
       if (index < 0 || length <= static_cast<size_type>(index)) {
-        throw std::out_of_range(cmStrCat("index: ", pos, " out of range (-",
-                                         this->Values.size(), ", ",
-                                         this->Values.size() - 1, ')'));
+        
       }
     }
     return index;
@@ -868,8 +819,7 @@ cmList::size_type cmList::ComputeInsertIndex(index_type pos,
 {
   if (boundCheck) {
     if (this->Values.empty() && pos != 0) {
-      throw std::out_of_range(
-        cmStrCat("index: ", pos, " out of range (0, 0)"));
+      
     }
 
     auto index = pos;
@@ -879,9 +829,7 @@ cmList::size_type cmList::ComputeInsertIndex(index_type pos,
         index = static_cast<index_type>(length) + index;
       }
       if (index < 0 || length < static_cast<size_type>(index)) {
-        throw std::out_of_range(cmStrCat("index: ", pos, " out of range (-",
-                                         this->Values.size(), ", ",
-                                         this->Values.size(), ')'));
+        
       }
     }
     return index;

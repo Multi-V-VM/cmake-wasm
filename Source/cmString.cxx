@@ -96,7 +96,6 @@ String& String::insert(size_type index, size_type count, char ch)
 String& String::erase(size_type index, size_type count)
 {
   if (index > this->size()) {
-    throw std::out_of_range("Index out of range in String::erase");
   }
   size_type const rcount = std::min(count, this->size() - index);
   size_type const rindex = index + rcount;
@@ -110,7 +109,6 @@ String& String::erase(size_type index, size_type count)
 String String::substr(size_type pos, size_type count) const
 {
   if (pos > this->size()) {
-    throw std::out_of_range("Index out of range in String::substr");
   }
   return String(*this, pos, count);
 }

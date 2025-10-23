@@ -151,7 +151,7 @@ using ResourceLimitType = struct rlimit;
 #ifdef __HAIKU__
 #  include <OS.h>
 #endif
-
+#undef KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE
 #if defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
 #  include <execinfo.h>
 #  if defined(KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE)
@@ -3908,7 +3908,7 @@ long long SystemInformationImplementation::GetProcMemoryUsed()
 
 double SystemInformationImplementation::GetLoadAverage()
 {
-#if defined(KWSYS_CXX_HAS_GETLOADAVG)
+#if defined(KWSYS_CXX_HAS_GETLOADAVG) && !defined(__wasi__)
   double loadavg[3] = { 0.0, 0.0, 0.0 };
   if (getloadavg(loadavg, 3) > 0) {
     return loadavg[0];

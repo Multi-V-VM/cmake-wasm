@@ -34,6 +34,10 @@ include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 list(APPEND HHEADERS "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
+if(WASI)
+  list(APPEND CSOURCES "${CMAKE_CURRENT_LIST_DIR}/wasi_stubs.c")
+endif()
+
 # The rest of the build
 
 set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES

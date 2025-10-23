@@ -383,18 +383,7 @@ bool HandleInMode(std::vector<std::string> const& args,
 
 bool TryParseInteger(cmExecutionStatus& status, std::string const& str, int& i)
 {
-  try {
     i = std::stoi(str);
-  } catch (std::invalid_argument const&) {
-    status.SetError(cmStrCat("Invalid integer: '", str, '\''));
-    cmSystemTools::SetFatalErrorOccurred();
-    return false;
-  } catch (std::out_of_range const&) {
-    status.SetError(cmStrCat("Integer out of range: '", str, '\''));
-    cmSystemTools::SetFatalErrorOccurred();
-    return false;
-  }
-
   return true;
 }
 

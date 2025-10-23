@@ -510,8 +510,6 @@ std::vector<std::string> findFilesIn(std::string const& path)
   gl.SetRecurseListDirs(true);
   gl.SetRecurseThroughSymlinks(false);
   if (!gl.FindFiles(findExpr)) {
-    throw std::runtime_error(
-      "Cannot find any files in the installed directory");
   }
   std::vector<std::string> files{ gl.GetFiles() };
   // Sort files so that they have a reproducible order
@@ -688,12 +686,7 @@ bool cmCPackDebGenerator::createDebPackages()
   auto make_package = [this](std::string const& path,
                              char const* const output_var,
                              bool (cmCPackDebGenerator::*creator)()) -> bool {
-    try {
       this->packageFiles = findFilesIn(path);
-    } catch (std::runtime_error const& ex) {
-      cmCPackLogger(cmCPackLog::LOG_ERROR, ex.what() << std::endl);
-      return false;
-    }
 
     if ((this->*creator)()) {
       // add the generated package to package file names list

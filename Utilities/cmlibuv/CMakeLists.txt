@@ -1,5 +1,24 @@
 project(libuv C)
 
+# WASI: build a minimal stubbed libuv and skip unix/win backends
+if(WASI)
+  set(uv_includes include src src/wasi)
+  set(uv_sources
+    src/uv-common.c
+    src/strscpy.c
+    src/version.c
+    src/wasi/wasi_stubs.c
+  )
+  include_directories(
+    ${uv_includes}
+    ${KWSYS_HEADER_ROOT}
+  )
+  add_library(cmlibuv STATIC ${uv_sources})
+  set_property(TARGET cmlibuv PROPERTY COMPILE_DEFINITIONS UV_WASI_STUBS=1)
+  install(FILES LICENSE DESTINATION ${CMAKE_DOC_DIR}/cmlibuv)
+  return()
+endif()
+
 # Disable warnings to avoid changing 3rd party code.
 if(CMAKE_C_COMPILER_ID MATCHES
     "^(GNU|LCC|Clang|AppleClang|IBMClang|XLClang|XL|VisualAge|SunPro|HP|Intel|IntelLLVM|NVHPC)$")

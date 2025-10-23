@@ -50,11 +50,7 @@ char const* const HIP_FEATURES[] = { nullptr FOR_EACH_HIP_FEATURE(
 
 int ParseStd(std::string const& level)
 {
-  try {
     return std::stoi(level);
-  } catch (std::invalid_argument&) {
-    // Fall through to use an invalid value.
-  }
   return -1;
 }
 

@@ -389,17 +389,11 @@ static const struct FilterNode : public cmGeneratorExpressionNode
       return {};
     }
 
-    try {
       return cmList{ parameters.front(), cmList::EmptyElements::Yes }
         .filter(parameters[2],
                 parameters[1] == "EXCLUDE" ? cmList::FilterMode::EXCLUDE
                                            : cmList::FilterMode::INCLUDE)
         .to_string();
-    } catch (std::invalid_argument&) {
-      reportError(eval, content->GetOriginalExpression(),
-                  "$<FILTER:...> failed to compile regex");
-      return {};
-    }
   }
 } filterNode;
 
@@ -1185,7 +1179,6 @@ inline cmList GetList(std::string const& list)
 
 bool GetNumericArgument(std::string const& arg, cmList::index_type& value)
 {
-  try {
     std::size_t pos;
 
     if (sizeof(cmList::index_type) == sizeof(long)) {
@@ -1198,9 +1191,6 @@ bool GetNumericArgument(std::string const& arg, cmList::index_type& value)
       // this is not a number
       return false;
     }
-  } catch (std::invalid_argument const&) {
-    return false;
-  }
 
   return true;
 }
@@ -1275,13 +1265,8 @@ static const struct ListNode : public cmGeneratorExpressionNode
                                        cmList::ExpandElements::Yes)) {
                 return std::string{};
               }
-              try {
                 return list.get_items(indexes.begin(), indexes.end())
                   .to_string();
-              } catch (std::out_of_range& e) {
-                reportError(ev, cnt->GetOriginalExpression(), e.what());
-                return std::string{};
-              }
             }
             return std::string{};
           } },
@@ -1316,15 +1301,10 @@ static const struct ListNode : public cmGeneratorExpressionNode
                                        " should be -1 or greater"));
                   return std::string{};
                 }
-                try {
                   return list
                     .sublist(static_cast<cmList::size_type>(indexes[0]),
                              static_cast<cmList::size_type>(indexes[1]))
                     .to_string();
-                } catch (std::out_of_range& e) {
-                  reportError(ev, cnt->GetOriginalExpression(), e.what());
-                  return std::string{};
-                }
               }
             }
             return std::string{};
@@ -1373,17 +1353,12 @@ static const struct ListNode : public cmGeneratorExpressionNode
                   cmStrCat("index: \"", args[1], "\" is not a valid index"));
                 return std::string{};
               }
-              try {
                 auto list = GetList(args.front());
                 args.advance(2);
                 list.insert_items(index, args.begin(), args.end(),
                                   cmList::ExpandElements::No,
                                   cmList::EmptyElements::Yes);
                 return list.to_string();
-              } catch (std::out_of_range& e) {
-                reportError(ev, cnt->GetOriginalExpression(), e.what());
-                return std::string{};
-              }
             }
             return std::string{};
           } },
@@ -1443,13 +1418,8 @@ static const struct ListNode : public cmGeneratorExpressionNode
                                        cmList::ExpandElements::Yes)) {
                 return std::string{};
               }
-              try {
                 return list.remove_items(indexes.begin(), indexes.end())
                   .to_string();
-              } catch (std::out_of_range& e) {
-                reportError(ev, cnt->GetOriginalExpression(), e.what());
-                return std::string{};
-              }
             }
             return std::string{};
           } },
@@ -1465,19 +1435,11 @@ static const struct ListNode : public cmGeneratorExpressionNode
                            op, "\". It must be either INCLUDE or EXCLUDE."));
                 return std::string{};
               }
-              try {
                 return GetList(args.front())
                   .filter(args[2],
                           op == "INCLUDE"_s ? cmList::FilterMode::INCLUDE
                                             : cmList::FilterMode::EXCLUDE)
                   .to_string();
-              } catch (std::invalid_argument&) {
-                reportError(
-                  ev, cnt->GetOriginalExpression(),
-                  cmStrCat("sub-command FILTER, failed to compile regex \"",
-                           args[2], "\"."));
-                return std::string{};
-              }
             }
             return std::string{};
           } },
@@ -1553,7 +1515,6 @@ static const struct ListNode : public cmGeneratorExpressionNode
                 std::string const FOR{ "FOR" };
                 std::unique_ptr<cmList::TransformSelector> selector;
 
-                try {
                   // handle optional arguments
                   while (!args.empty()) {
                     if ((args.front() == REGEX || args.front() == AT ||
@@ -1686,10 +1647,6 @@ static const struct ListNode : public cmGeneratorExpressionNode
                     .transform(descriptor->Action, arguments,
                                std::move(selector))
                     .to_string();
-                } catch (cmList::transform_error& e) {
-                  reportError(ev, cnt->GetOriginalExpression(), e.what());
-                  return std::string{};
-                }
               }
             }
             return std::string{};

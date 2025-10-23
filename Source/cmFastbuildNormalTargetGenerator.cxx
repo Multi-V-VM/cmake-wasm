@@ -1416,7 +1416,6 @@ FastbuildUnityNode cmFastbuildNormalTargetGenerator::GetOneUnity(
 int cmFastbuildNormalTargetGenerator::GetUnityBatchSize() const
 {
   int unitySize = 8;
-  try {
     auto const perTargetSize =
       GeneratorTarget->GetSafeProperty(UNITY_BUILD_BATCH_SIZE);
     if (!perTargetSize.empty()) {
@@ -1428,9 +1427,6 @@ int cmFastbuildNormalTargetGenerator::GetUnityBatchSize() const
         GeneratorTarget->GetLocalGenerator()->GetMakefile()->GetDefinition(
           CMAKE_UNITY_BUILD_BATCH_SIZE));
     }
-  } catch (...) {
-    return unitySize;
-  }
   return unitySize;
 }
 

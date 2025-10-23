@@ -90,7 +90,7 @@
       defined(__HAIKU__)  || \
       defined(__QNX__)
 # include <sys/statvfs.h>
-#else
+#elif !defined(__wasi__)
 # include <sys/statfs.h>
 #endif
 
@@ -679,11 +679,14 @@ static int uv__fs_closedir(uv_fs_t* req) {
 
 static int uv__fs_statfs(uv_fs_t* req) {
   uv_statfs_t* stat_fs;
-#if defined(__sun)      || \
-    defined(__MVS__)    || \
-    defined(__NetBSD__) || \
-    defined(__HAIKU__)  || \
-    defined(__QNX__)
+#if defined(__wasi__)
+  errno = ENOSYS;
+  return -1;
+#elif defined(__sun)      || \
+      defined(__MVS__)    || \
+      defined(__NetBSD__) || \
+      defined(__HAIKU__)  || \
+      defined(__QNX__)
   struct statvfs buf;
 
   if (0 != statvfs(req->path, &buf))

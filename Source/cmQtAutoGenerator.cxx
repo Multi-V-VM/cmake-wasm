@@ -215,11 +215,7 @@ cmQtAutoGenerator::~cmQtAutoGenerator() = default;
 
 bool cmQtAutoGenerator::InfoT::Read(std::istream& istr)
 {
-  try {
     istr >> this->Json_;
-  } catch (...) {
-    return false;
-  }
   return true;
 }
 

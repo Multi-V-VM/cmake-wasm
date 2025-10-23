@@ -4082,7 +4082,7 @@ write_information_block(struct archive_write *a)
 	}
 	memset(info.s, 0, info_size);
 	opt = 0;
-#if defined(HAVE_CTIME_S)
+#if defined(HAVE_CTIME_S) && !defined(__wasi__)
 	ctime_s(buf, sizeof(buf), &(iso9660->birth_time));
 #elif defined(HAVE_CTIME_R)
 	ctime_r(&(iso9660->birth_time), buf);
@@ -8178,4 +8178,3 @@ zisofs_free(struct archive_write *a)
 }
 
 #endif /* HAVE_ZLIB_H */
-

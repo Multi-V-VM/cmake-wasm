@@ -57,11 +57,7 @@ void WriteTryRunEvent(cmConfigureLog& log, cmMakefile const& mf,
       log.WriteLiteralTextBlock("stderr"_s, *runResult.Stderr);
     }
     if (runResult.ExitCode) {
-      try {
         log.WriteValue("exitCode"_s, std::stoi(*runResult.ExitCode));
-      } catch (std::invalid_argument const&) {
-        log.WriteValue("exitCode"_s, *runResult.ExitCode);
-      }
     }
     log.EndObject();
     log.EndEvent();

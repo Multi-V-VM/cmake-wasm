@@ -538,18 +538,11 @@ void cmInstrumentation::WriteInstrumentationJson(Json::Value& root,
 
   cmsys::ofstream ftmp(cmStrCat(directory, '/', file_name).c_str());
   if (!ftmp.good()) {
-    throw std::runtime_error(std::string("Unable to open: ") + file_name);
   }
 
-  try {
     JsonWriter->write(root, &ftmp);
     ftmp << "\n";
     ftmp.close();
-  } catch (std::ios_base::failure& fail) {
-    cmSystemTools::Error(cmStrCat("Failed to write JSON: ", fail.what()));
-  } catch (...) {
-    cmSystemTools::Error("Error writing JSON output for instrumentation.");
-  }
 }
 
 std::string cmInstrumentation::InstrumentTest(
@@ -1012,7 +1005,6 @@ void cmInstrumentation::WriteTraceFile(Json::Value const& index,
     std::unique_ptr<Json::StreamWriter>(wbuilder.newStreamWriter());
   traceStream.open(traceFile.c_str(), std::ios::out | std::ios::trunc);
   if (!traceStream.good()) {
-    throw std::runtime_error(std::string("Unable to open: ") + traceFile);
   }
   traceStream << "[";
 
@@ -1025,7 +1017,6 @@ void cmInstrumentation::WriteTraceFile(Json::Value const& index,
   for (size_t i = 0; i < snippets.size(); i++) {
     snippetData = this->ReadJsonSnippet(snippets[i]);
     traceEvent = this->BuildTraceEvent(workers, snippetData);
-    try {
       if (i > 0) {
         traceStream << ",";
       }
@@ -1034,20 +1025,10 @@ void cmInstrumentation::WriteTraceFile(Json::Value const& index,
         traceStream.flush();
         traceStream.clear();
       }
-    } catch (std::ios_base::failure& fail) {
-      cmSystemTools::Error(
-        cmStrCat("Failed to write to Google trace file: ", fail.what()));
-    } catch (...) {
-      cmSystemTools::Error("Error writing Google trace output.");
-    }
   }
 
-  try {
     traceStream << "]\n";
     traceStream.close();
-  } catch (...) {
-    cmSystemTools::Error("Error writing Google trace output.");
-  }
 }
 
 Json::Value cmInstrumentation::BuildTraceEvent(std::vector<uint64_t>& workers,

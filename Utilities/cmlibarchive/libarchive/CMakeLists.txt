@@ -174,6 +174,15 @@ SET(libarchive_SOURCES
   xxhash.c
 )
 
+# WASI: drop disk and forking backends not available in the sandbox.
+if(WASI)
+  list(REMOVE_ITEM libarchive_SOURCES
+    archive_read_disk_entry_from_file.c
+    archive_read_disk_posix.c
+    archive_write_disk_posix.c
+    filter_fork_posix.c)
+endif()
+
 # Man pages
 SET(libarchive_MANS
   archive_entry.3

@@ -181,16 +181,12 @@ bool cmFileAPI::ReadJsonFile(std::string const& file, Json::Value& value,
   auto finEnd = fin.rdbuf()->pubseekoff(0, std::ios::end);
   if (finEnd > 0) {
     size_t finSize = finEnd;
-    try {
       // Allocate a buffer to read the whole file.
       content.resize(finSize);
 
       // Now read the file from the beginning.
       fin.seekg(0, std::ios::beg);
       fin.read(content.data(), finSize);
-    } catch (...) {
-      fin.setstate(std::ios::failbit);
-    }
   }
   fin.close();
   if (!fin) {

@@ -24,7 +24,6 @@ cmMakefileProfilingData::cmMakefileProfilingData(
   this->JsonWriter =
     std::unique_ptr<Json::StreamWriter>(wbuilder.newStreamWriter());
   if (!this->ProfileStream.good()) {
-    throw std::runtime_error(std::string("Unable to open: ") + profileStream);
   }
 
   this->ProfileStream << "[";
@@ -33,12 +32,8 @@ cmMakefileProfilingData::cmMakefileProfilingData(
 cmMakefileProfilingData::~cmMakefileProfilingData() noexcept
 {
   if (this->ProfileStream.good()) {
-    try {
       this->ProfileStream << "]";
       this->ProfileStream.close();
-    } catch (...) {
-      cmSystemTools::Error("Error writing profiling output!");
-    }
   }
 }
 
@@ -51,7 +46,6 @@ void cmMakefileProfilingData::StartEntry(std::string const& category,
     return;
   }
 
-  try {
     if (this->ProfileStream.tellp() > 1) {
       this->ProfileStream << ",";
     }
@@ -71,12 +65,6 @@ void cmMakefileProfilingData::StartEntry(std::string const& category,
     }
 
     this->JsonWriter->write(v, &this->ProfileStream);
-  } catch (std::ios_base::failure& fail) {
-    cmSystemTools::Error(
-      cmStrCat("Failed to write to profiling output: ", fail.what()));
-  } catch (...) {
-    cmSystemTools::Error("Error writing profiling output!");
-  }
 }
 
 void cmMakefileProfilingData::StopEntry()
@@ -86,7 +74,6 @@ void cmMakefileProfilingData::StopEntry()
     return;
   }
 
-  try {
     this->ProfileStream << ",";
     cmsys::SystemInformation info;
     Json::Value v;
@@ -98,12 +85,6 @@ void cmMakefileProfilingData::StopEntry()
     v["pid"] = static_cast<int>(info.GetProcessId());
     v["tid"] = 0;
     this->JsonWriter->write(v, &this->ProfileStream);
-  } catch (std::ios_base::failure& fail) {
-    cmSystemTools::Error(
-      cmStrCat("Failed to write to profiling output:", fail.what()));
-  } catch (...) {
-    cmSystemTools::Error("Error writing profiling output!");
-  }
 }
 
 cmMakefileProfilingData::RAII::RAII(cmMakefileProfilingData& data,

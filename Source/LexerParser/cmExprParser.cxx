@@ -1554,7 +1554,6 @@ yyreduce:
 #line 144 "cmExprParser.y"
                         {
     if (yyvsp[0].Number == 0) {
-      throw std::overflow_error("divide by zero");
     }
     (yyval.Number) = (yyvsp[-2].Number) / (yyvsp[0].Number);
   }

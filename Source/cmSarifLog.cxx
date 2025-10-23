@@ -190,7 +190,6 @@ cmSarif::SourceFileLocation::SourceFileLocation(
   cmListFileBacktrace const& backtrace)
 {
   if (backtrace.Empty()) {
-    throw std::runtime_error("Empty source file location");
   }
 
   cmListFileContext const& lfc = backtrace.Top();

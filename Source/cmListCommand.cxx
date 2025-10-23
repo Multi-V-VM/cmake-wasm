@@ -142,14 +142,9 @@ bool HandleGetCommand(std::vector<std::string> const& args,
     indexes.push_back(index);
   }
 
-  try {
     auto values = list->get_items(indexes.begin(), indexes.end());
     status.GetMakefile().AddDefinition(variableName, values.to_string());
     return true;
-  } catch (std::out_of_range& e) {
-    status.SetError(e.what());
-    return false;
-  }
 }
 
 bool HandleAppendCommand(std::vector<std::string> const& args,
@@ -338,15 +333,10 @@ bool HandleInsertCommand(std::vector<std::string> const& args,
     list = cmList{};
   }
 
-  try {
     list->insert_items(index, args.begin() + 3, args.end(),
                        cmList::ExpandElements::No, cmList::EmptyElements::Yes);
     status.GetMakefile().AddDefinition(listName, list->to_string());
     return true;
-  } catch (std::out_of_range& e) {
-    status.SetError(e.what());
-    return false;
-  }
 }
 
 bool HandleJoinCommand(std::vector<std::string> const& args,
@@ -523,7 +513,6 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
   std::unique_ptr<cmList::TransformSelector> selector;
   std::string outputName = listName;
 
-  try {
     // handle optional arguments
     while (args.size() > index) {
       if ((args[index] == REGEX || args[index] == AT || args[index] == FOR) &&
@@ -559,17 +548,12 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
           std::size_t pos;
           int value;
 
-          try {
             value = std::stoi(args[index], &pos);
             if (pos != args[index].length()) {
               // this is not a number, stop processing
               break;
             }
             indexes.push_back(value);
-          } catch (std::invalid_argument const&) {
-            // this is not a number, stop processing
-            break;
-          }
         }
 
         if (indexes.empty()) {
@@ -599,7 +583,6 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
         cmList::index_type stop = 0;
         cmList::index_type step = 1;
         bool valid = true;
-        try {
           std::size_t pos;
 
           start = std::stoi(args[index], &pos);
@@ -613,10 +596,6 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
               valid = false;
             }
           }
-        } catch (std::invalid_argument const&) {
-          // this is not numbers
-          valid = false;
-        }
         if (!valid) {
           status.SetError("sub-command TRANSFORM, selector FOR expects, "
                           "at least, two numeric values.");
@@ -624,7 +603,6 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
         }
         // try to read a third numeric value for step
         if (args.size() > ++index) {
-          try {
             std::size_t pos;
 
             step = std::stoi(args[index], &pos);
@@ -634,9 +612,6 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
             } else {
               index += 1;
             }
-          } catch (std::invalid_argument const&) {
-            // this is not number, ignore exception
-          }
         }
 
         if (step <= 0) {
@@ -686,10 +661,6 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
     list->transform(descriptor->Action, arguments, std::move(selector));
     status.GetMakefile().AddDefinition(outputName, list->to_string());
     return true;
-  } catch (cmList::transform_error& e) {
-    status.SetError(e.what());
-    return false;
-  }
 }
 
 bool HandleSortCommand(std::vector<std::string> const& args,
@@ -846,15 +817,10 @@ bool HandleSublistCommand(std::vector<std::string> const& args,
 
   using size_type = cmList::size_type;
 
-  try {
     auto sublist = list->sublist(static_cast<size_type>(start),
                                  static_cast<size_type>(length));
     status.GetMakefile().AddDefinition(variableName, sublist.to_string());
     return true;
-  } catch (std::out_of_range& e) {
-    status.SetError(e.what());
-    return false;
-  }
 }
 
 bool HandleRemoveAtCommand(std::vector<std::string> const& args,
@@ -895,15 +861,10 @@ bool HandleRemoveAtCommand(std::vector<std::string> const& args,
     removed.push_back(index);
   }
 
-  try {
     status.GetMakefile().AddDefinition(
       listName,
       list->remove_items(removed.begin(), removed.end()).to_string());
     return true;
-  } catch (std::out_of_range& e) {
-    status.SetError(e.what());
-    return false;
-  }
 }
 
 bool HandleFilterCommand(std::vector<std::string> const& args,
@@ -956,14 +917,9 @@ bool HandleFilterCommand(std::vector<std::string> const& args,
   }
   std::string const& pattern = args[4];
 
-  try {
     status.GetMakefile().AddDefinition(
       listName, list->filter(pattern, filterMode).to_string());
     return true;
-  } catch (std::invalid_argument& e) {
-    status.SetError(e.what());
-    return false;
-  }
 }
 } // namespace
 

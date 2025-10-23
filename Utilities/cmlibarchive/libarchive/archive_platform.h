@@ -50,6 +50,76 @@
 #error Oops: No config.h and no pre-built configuration in archive_platform.h.
 #endif
 
+/*
+ * When cross-compiling to WASI, some configure-time feature checks can
+ * incorrectly detect host capabilities. Normalize here for the WASI target.
+ */
+#if defined(__wasi__)
+#undef HAVE_CTIME_S
+#ifndef HAVE_CTIME_R
+# define HAVE_CTIME_R 1
+#endif
+#undef HAVE_GMTIME_S
+#ifndef HAVE_GMTIME_R
+# define HAVE_GMTIME_R 1
+#endif
+#undef HAVE_LOCALTIME_S
+#ifndef HAVE_LOCALTIME_R
+# define HAVE_LOCALTIME_R 1
+#endif
+#undef HAVE__MKGMTIME
+#ifndef HAVE_TIMEGM
+# define HAVE_TIMEGM 1
+#endif
+
+/* Disable use of non-existent system crypto backends on WASI. */
+#undef ARCHIVE_CRYPTO_MD5_LIBC
+#undef ARCHIVE_CRYPTO_MD5_LIBSYSTEM
+#undef ARCHIVE_CRYPTO_RMD160_LIBC
+#undef ARCHIVE_CRYPTO_SHA1_LIBC
+#undef ARCHIVE_CRYPTO_SHA1_LIBSYSTEM
+#undef ARCHIVE_CRYPTO_SHA256_LIBC
+#undef ARCHIVE_CRYPTO_SHA256_LIBC2
+#undef ARCHIVE_CRYPTO_SHA384_LIBC
+#undef ARCHIVE_CRYPTO_SHA384_LIBC2
+#undef ARCHIVE_CRYPTO_SHA512_LIBC
+#undef ARCHIVE_CRYPTO_SHA512_LIBC2
+
+/* Disable unavailable system headers on WASI. */
+#undef HAVE_SYS_ACL_H
+#undef HAVE_SYS_STATFS_H
+#undef HAVE_SYS_STATVFS_H
+#undef HAVE_SYS_XATTR_H
+#undef HAVE_SYS_MOUNT_H
+#undef HAVE_SYS_UTIME_H
+#undef HAVE_COPYFILE_H
+#undef HAVE_EXT2FS_EXT2_FS_H
+#undef HAVE_LINUX_EXT2_FS_H
+#undef HAVE_LINUX_TYPES_H
+#undef HAVE_LINUX_FIEMAP_H
+
+/* Avoid using EFTYPE if not truly provided. */
+#undef HAVE_EFTYPE
+/* Avoid misdetected struct stat fields on WASI. */
+#undef HAVE_STRUCT_STAT_ST_BIRTHTIME
+#undef HAVE_STRUCT_STAT_ST_BIRTHTIMESPEC_TV_NSEC
+#undef HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC
+#undef HAVE_STRUCT_STAT_ST_MTIME_N
+#undef HAVE_STRUCT_STAT_ST_MTIME_USEC
+#undef HAVE_STRUCT_STAT_ST_MTIM_TV_NSEC
+#undef HAVE_STRUCT_STAT_ST_UMTIME
+#undef HAVE_STRUCT_STAT_ST_UCTIME
+#undef HAVE_STRUCT_STAT_ST_UATIME
+#undef HAVE_DIRECT_H
+/* Avoid system-specific major/minor header selections. */
+#undef MAJOR_IN_MKDEV
+#undef MAJOR_IN_SYSMACROS
+/* Avoid Linux/BSD-only headers that are not present on WASI. */
+#undef HAVE_LINUX_FS_H
+#undef HAVE_LINUX_MAGIC_H
+#undef HAVE_SYS_EXTATTR_H
+#endif /* __wasi__ */
+
 /* On macOS check for some symbols based on the deployment target version.  */
 #if defined(__APPLE__)
 # undef HAVE_FUTIMENS
@@ -188,7 +258,7 @@
 
 /* Set up defaults for internal error codes. */
 #ifndef ARCHIVE_ERRNO_FILE_FORMAT
-#if HAVE_EFTYPE
+#if HAVE_EFTYPE && defined(EFTYPE)
 #define	ARCHIVE_ERRNO_FILE_FORMAT EFTYPE
 #else
 #if HAVE_EILSEQ
