@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include "uv-common.h"
 
 static uv_loop_t default_loop_storage;
 static int default_loop_inited = 0;
@@ -106,3 +107,53 @@ int uv_cpumask_size(void) { return 0; }
 int uv_is_active(const uv_handle_t* h) { (void)h; return 0; }
 int uv_is_readable(const uv_stream_t* s) { (void)s; return 0; }
 int uv_is_writable(const uv_stream_t* s) { (void)s; return 0; }
+
+/* Public helpers */
+const char* uv_strerror(int err) {
+  (void)err; return "uv(wasi-stub)";
+}
+
+uv_loop_t* uv_default_loop(void) {
+  if (!default_loop_inited) {
+    memset(&default_loop_storage, 0, sizeof(default_loop_storage));
+    default_loop_inited = 1;
+  }
+  return &default_loop_storage;
+}
+
+int uv_loop_close(uv_loop_t* loop) { (void)loop; return 0; }
+
+/* Networking helpers stubs */
+int uv_inet_pton(int af, const char* src, void* dst) {
+  (void)af; (void)src; (void)dst; return UV_EAFNOSUPPORT;
+}
+int uv_inet_ntop(int af, const void* src, char* dst, size_t size) {
+  (void)af; (void)src; (void)dst; (void)size; return UV_EAFNOSUPPORT;
+}
+
+/* Internal backend stubs referenced by uv-common.c */
+int uv__tcp_bind(uv_tcp_t* tcp, const struct sockaddr* addr, unsigned int addrlen, unsigned int flags) {
+  (void)tcp; (void)addr; (void)addrlen; (void)flags; return UV_ENOSYS;
+}
+int uv__tcp_connect(uv_connect_t* req, uv_tcp_t* handle, const struct sockaddr* addr, unsigned int addrlen, uv_connect_cb cb) {
+  (void)req; (void)handle; (void)addr; (void)addrlen; (void)cb; return UV_ENOSYS;
+}
+int uv__udp_init_ex(uv_loop_t* loop, uv_udp_t* handle, unsigned flags, int domain) {
+  (void)loop; (void)handle; (void)flags; (void)domain; return UV_ENOSYS;
+}
+int uv__udp_bind(uv_udp_t* handle, const struct sockaddr* addr, unsigned int addrlen, unsigned int flags) {
+  (void)handle; (void)addr; (void)addrlen; (void)flags; return UV_ENOSYS;
+}
+int uv__udp_disconnect(uv_udp_t* handle) {
+  (void)handle; return UV_ENOSYS;
+}
+
+int uv_read_start(uv_stream_t* s, uv_alloc_cb a, uv_read_cb r) {
+  (void)s; (void)a; (void)r; return 0;
+}
+
+void uv_unref(uv_handle_t* handle) { (void)handle; }
+
+uv_buf_t uv_buf_init(char* base, unsigned int len) {
+  uv_buf_t b; b.base = base; b.len = len; return b;
+}

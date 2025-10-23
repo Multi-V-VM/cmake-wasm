@@ -4,8 +4,6 @@ project(libuv C)
 if(WASI)
   set(uv_includes include src src/wasi)
   set(uv_sources
-    src/uv-common.c
-    src/strscpy.c
     src/version.c
     src/wasi/wasi_stubs.c
   )

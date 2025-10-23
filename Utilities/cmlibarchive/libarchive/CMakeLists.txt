@@ -172,6 +172,7 @@ SET(libarchive_SOURCES
   filter_fork_posix.c
   filter_fork.h
   xxhash.c
+  archive_wasi_stubs.c
 )
 
 # WASI: drop disk and forking backends not available in the sandbox.
